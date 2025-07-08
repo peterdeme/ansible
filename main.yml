@@ -1,12 +1,45 @@
 ---
-- name: Spacelift Ansible end-to-end test
-  hosts: localhost
+- name: Spacelift Ansible - 5000 no-op tasks
+  hosts: all
   connection: local
   gather_facts: no
-
+  strategy: free
+  
   tasks:
-    - name: Simulate 5000 test resource creations
+    # Method 1: Using meta noop
+    - name: "No-op task {{ item }} (meta)"
+      meta: noop
+      loop: "{{ range(1, 1251) | list }}"
+      loop_control:
+        label: "noop-{{ item }}"
+
+    # Method 2: Using debug with conditional false
+    - name: "No-op task {{ item + 1250 }} (debug-false)"
       debug:
-        msg: "Simulated creation of testresource{{ item }}"
-      loop: "{{ range(1, 8000) | list }}"
-      no_log: true
+        msg: "This will never execute"
+      when: false
+      loop: "{{ range(1, 1251) | list }}"
+      loop_control:
+        label: "debug-false-{{ item + 1250 }}"
+
+    # Method 3: Using command with /bin/true
+    - name: "No-op task {{ item + 2500 }} (true)"
+      command: /bin/true
+      loop: "{{ range(1, 1251) | list }}"
+      loop_control:
+        label: "true-{{ item + 2500 }}"
+      changed_when: false
+
+    # Method 4: Using assert with true condition
+    - name: "No-op task {{ item + 3750 }} (assert)"
+      assert:
+        that:
+          - true
+        quiet: true
+      loop: "{{ range(1, 1251) | list }}"
+      loop_control:
+        label: "assert-{{ item + 3750 }}"
+
+    - name: Summary
+      debug:
+        msg: "Completed 5000 no-op tasks successfully!"
