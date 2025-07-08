@@ -1,9 +1,12 @@
 ---
 - name: Spacelift Ansible end-to-end test
-  hosts: all
+  hosts: localhost
   connection: local
   gather_facts: no
- 
+
   tasks:
-  - name: Hello World!
-    shell: echo "Hi! Ansible integration is working."
+    - name: Simulate 5000 test resource creations
+      debug:
+        msg: "Simulated creation of testresource{{ item }}"
+      loop: "{{ range(1, 8000) | list }}"
+      no_log: true
